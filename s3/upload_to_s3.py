@@ -26,12 +26,16 @@ def validate_folder_paths(folder_names):
             print '"{0}" does not exist'.format(folder_path)
             sys.exit(1)
 
-def upload_file(bucket, file_name, folder_name, folder_path):
+def upload_file(bucket, file_name, folder_name, folder_path, delete=False):
     key = bucket.new_key(folder_name + file_name)
-    key.set_contents_from_filename(folder_path + '/' + file_name)
+    file_path = folder_path + '/' + file_name
+    key.set_contents_from_filename(file_path)
     logger.debug('File {0} uploaded.'.format(folder_name + file_name))
+    if delete:
+        os.remove(file_path)
+        logger.debug('File {0} deleted.'.format(folder_name + file_name))
 
-def upload_folder(bucket, folder_name):
+def upload_folder(bucket, folder_name, delete=False):
     folder_path = os.path.abspath(
         os.path.expandvars(
             os.path.expanduser(folder_name)))
@@ -40,9 +44,9 @@ def upload_folder(bucket, folder_name):
     if not folder_key:
         bucket.new_key(folder_name)
     files = [f for f in os.listdir(folder_path)
-             if not f.startswith('.')]
+             if not f.startswith('.') and os.path.isfile(folder_path + '/' + f)]
     for file_name in files:
-        upload_file(bucket, file_name, folder_name, folder_path)
+        upload_file(bucket, file_name, folder_name, folder_path, delete=delete)
     logger.info('Folder {0} uploaded'.format(folder_name))
 
 def set_logger(verbosity_level):
@@ -66,7 +70,7 @@ def main():
     validate_folder_paths(args['folders'])
 
     for folder_path in args['folders']:
-        upload_folder(bucket, folder_path)
+        upload_folder(bucket, folder_path, delete=args['delete'])
 
 if __name__ == '__main__':
     main()
