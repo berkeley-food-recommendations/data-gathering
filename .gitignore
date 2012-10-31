@@ -26,5 +26,6 @@ pip-log.txt
 #Mr Developer
 .mr.developer.cfg
 
-# Project specific secrets file
+# Project-specific secrets file
 twitter_keys.py
+boto.cfg
