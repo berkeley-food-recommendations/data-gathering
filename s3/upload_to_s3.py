@@ -27,6 +27,8 @@ def validate_folder_paths(folder_names):
             sys.exit(1)
 
 def upload_file(bucket, file_name, folder_name, folder_path, delete=False):
+    if not folder_name.endswith('/'):
+        folder_name = folder_name + '/'
     key = bucket.new_key(folder_name + file_name)
     file_path = folder_path + '/' + file_name
     key.set_contents_from_filename(file_path)
