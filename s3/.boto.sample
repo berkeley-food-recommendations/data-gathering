@@ -1,0 +1,8 @@
+# Instructions
+# $ cp s3/.boto.sample ~/.boto
+# $ $EDITOR ~/.boto
+# Insert your access key credentials here
+
+[Credentials]
+aws_access_key_id = {ACCESS KEY ID}
+aws_secret_access_key = {SECRET ACCESS KEY}
