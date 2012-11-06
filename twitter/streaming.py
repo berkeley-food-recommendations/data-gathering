@@ -17,7 +17,6 @@ import unicodecsv
 from auth_common import auth
 from tweepy.utils import import_simplejson
 
-UNFLUSHED_TWEET_LIMIT = 5
 json = import_simplejson()
 
 parser = argparse.ArgumentParser(
@@ -72,11 +71,8 @@ class StreamListener(tweepy.StreamListener):
             print >>sys.stderr, data
             return False
 
-        self.unflushed_counter += 1
         print >>self.outfile, data
-        if self.unflushed_counter > UNFLUSHED_TWEET_LIMIT:
-            self.outfile.flush()
-            self.unflushed_counter = 0
+        self.outfile.flush()
 
         if self.stdout:
             print data
