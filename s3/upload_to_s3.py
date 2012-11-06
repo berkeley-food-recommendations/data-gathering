@@ -57,7 +57,7 @@ def set_logger(verbosity_level):
     elif verbosity_level >= 2:
         level = logging.DEBUG
     else:
-        level = None
+        level = logging.ERROR
     logger.setLevel(level)
     logging.basicConfig(format='%(asctime)s %(message)s')
 
