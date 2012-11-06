@@ -61,7 +61,6 @@ class StreamListener(tweepy.StreamListener):
         del kwargs['outfile']
 
         header = ['TweetID', 'User', 'Tweet', 'Coordinates', 'Place']
-        self.csv_writer.writerow(header)
         if kwargs['stdout']:
             print ','.join(header)
         del kwargs['stdout']
