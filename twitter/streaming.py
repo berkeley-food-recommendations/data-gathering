@@ -11,6 +11,8 @@ import unicodecsv
 
 from auth_common import auth
 
+UNFLUSHED_TWEET_LIMIT = 5
+
 parser = argparse.ArgumentParser(
     description='Record tweets from the Twitter /filter Streaming API')
 parser.add_argument(
@@ -55,6 +57,8 @@ class StreamListener(tweepy.StreamListener):
         if 'time_limit' in kwargs:
             del kwargs['time_limit']
 
+        self.outfile = kwargs['outfile']
+
         self.csv_writer = unicodecsv.writer(
             kwargs['outfile'],
             encoding='utf-8')
@@ -65,15 +69,21 @@ class StreamListener(tweepy.StreamListener):
             print ','.join(header)
         del kwargs['stdout']
 
+        self.unflushed_counter = 0
+
         super(StreamListener, self).__init__(*args, **kwargs)
 
     def on_status(self, status):
+        self.unflushed_counter += 1
         tweet_row = [status.id_str,
                      status.user.screen_name.lower(),
                      status.text,
                      StatusUtils.get_coords(status),
                      StatusUtils.get_place_coords(status)]
         self.csv_writer.writerow(tweet_row)
+        if self.unflushed_counter > UNFLUSHED_TWEET_LIMIT:
+            self.outfile.flush()
+            self.unflushed_counter = 0
         if args['stdout']:
             print ','.join(tuple(tweet_row))
 
