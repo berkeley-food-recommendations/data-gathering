@@ -30,3 +30,4 @@ pip-log.txt
 twitter_keys.py
 boto.cfg
 .boto
+factual_api_keys.py
