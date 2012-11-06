@@ -1,5 +1,10 @@
 #!/usr/bin/env python2.7
 
+'''
+Storing tweets as JSON:
+  https://groups.google.com/forum/#!msg/tweepy/sFzCYVoGT68/EOg9xshgSM0J
+'''
+
 import argparse
 import codecs
 import collections
@@ -10,8 +15,10 @@ import tweepy
 import unicodecsv
 
 from auth_common import auth
+from tweepy.utils import import_simplejson
 
 UNFLUSHED_TWEET_LIMIT = 5
+json = import_simplejson()
 
 parser = argparse.ArgumentParser(
     description='Record tweets from the Twitter /filter Streaming API')
@@ -23,7 +30,7 @@ parser.add_argument(
 parser.add_argument(
     '-of',
     '--output-file',
-    default='tweets/tweets.csv',
+    default='tweets/tweets.json',
     help='File in which to store the streaming tweets')
 parser.add_argument(
     '-u', '--unlimited',
@@ -34,21 +41,6 @@ parser.add_argument(
     action='store_true',
     help='Print each tweet to STDOUT')
 args = vars(parser.parse_args())
-
-class StatusUtils:
-    @classmethod
-    def get_coords(self, status):
-        if status.coordinates:
-            return '{0},{1}'.format(*status.coordinates[u'coordinates'])
-        else:
-            return ''
-
-    @classmethod
-    def get_place_coords(self, status):
-        if status.place:
-            return str(status.place[u'bounding_box'])
-        else:
-            return ''
 
 class StreamListener(tweepy.StreamListener):
     def __init__(self, *args, **kwargs):
@@ -64,31 +56,32 @@ class StreamListener(tweepy.StreamListener):
             encoding='utf-8')
         del kwargs['outfile']
 
-        header = ['TweetID', 'User', 'Tweet', 'Coordinates', 'Place', 'CreatedAtTime']
-        if kwargs['stdout']:
-            print ','.join(header)
+        self.stdout = kwargs['stdout']
         del kwargs['stdout']
+
+        self.time = kwargs['time']
+        del kwargs['time']
 
         self.unflushed_counter = 0
 
         super(StreamListener, self).__init__(*args, **kwargs)
 
-    def on_status(self, status):
+    def on_data(self, data):
+        json_data = json.loads(data)
+        if 'disconnect' in json_data:
+            print >>sys.stderr, data
+            return False
+
         self.unflushed_counter += 1
-        tweet_row = [status.id_str,
-                     status.user.screen_name.lower(),
-                     status.text,
-                     StatusUtils.get_coords(status),
-                     StatusUtils.get_place_coords(status),
-                     str(int(time.mktime(status.created_at.timetuple())))]
-        self.csv_writer.writerow(tweet_row)
+        print >>self.outfile, data
         if self.unflushed_counter > UNFLUSHED_TWEET_LIMIT:
             self.outfile.flush()
             self.unflushed_counter = 0
-        if args['stdout']:
-            print ','.join(tuple(tweet_row))
 
-        if self.time_limit and time.time() >= self.start_time + args['time']:
+        if self.stdout:
+            print data
+
+        if self.time_limit and time.time() >= self.start_time + self.time:
             return False
 
 outfile = open(
@@ -101,7 +94,8 @@ stream = tweepy.streaming.Stream(
     StreamListener(
         time_limit=not args['unlimited'],
         outfile=outfile,
-        stdout=args['stdout']),
+        stdout=args['stdout'],
+        time=args['time']),
     timeout=60)
 
 # Roughly a bounding box for Berkeley
