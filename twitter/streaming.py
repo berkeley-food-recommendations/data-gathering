@@ -64,7 +64,7 @@ class StreamListener(tweepy.StreamListener):
             encoding='utf-8')
         del kwargs['outfile']
 
-        header = ['TweetID', 'User', 'Tweet', 'Coordinates', 'Place']
+        header = ['TweetID', 'User', 'Tweet', 'Coordinates', 'Place', 'CreatedAtTime']
         if kwargs['stdout']:
             print ','.join(header)
         del kwargs['stdout']
@@ -79,7 +79,8 @@ class StreamListener(tweepy.StreamListener):
                      status.user.screen_name.lower(),
                      status.text,
                      StatusUtils.get_coords(status),
-                     StatusUtils.get_place_coords(status)]
+                     StatusUtils.get_place_coords(status),
+                     str(int(time.mktime(status.created_at.timetuple())))]
         self.csv_writer.writerow(tweet_row)
         if self.unflushed_counter > UNFLUSHED_TWEET_LIMIT:
             self.outfile.flush()
