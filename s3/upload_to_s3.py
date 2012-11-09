@@ -9,12 +9,12 @@ import sys
 parser = argparse.ArgumentParser(
     description='Upload files from a folder to an Amazon S3 bucket')
 
-parser.add_argument('folders', metavar='N', type=str, nargs='+',
+parser.add_argument('folders', metavar='folder', type=str, nargs='+',
                     help='folders containing files to be uplaoded')
 parser.add_argument('-D', '--delete', action='store_true',
                     help='delete files after uploading')
 parser.add_argument('-v', '--verbosity', action='count',
-                    help='delete files after uploading')
+                    help='level of descriptive output <0-2>, default: 0')
 parser.add_argument('-b', '--bucket',  type=str)
 
 args = vars(parser.parse_args())
