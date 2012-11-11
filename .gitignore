@@ -26,8 +26,12 @@ pip-log.txt
 #Mr Developer
 .mr.developer.cfg
 
+#Mac Specific
+.DS_Store
+
 # Project-specific secrets file
 twitter_keys.py
 boto.cfg
 .boto
 tweets/
+factual_api_keys.py
