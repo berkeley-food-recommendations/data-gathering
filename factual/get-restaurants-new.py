@@ -13,7 +13,7 @@ if __name__ == "__main__":
 	curOffset = limit
 	results= results+query.data()
 	while(curOffset<min(tot,maximum)):
-		query = factual.table("restaurants-us").filters({"$and":[{"region":"CA"},{"locality":"berkeley"}]}).include_count(True).limit(str(limit)).offset(str(curOffset)).sort("address:asc")
+		query = factual.table("restaurants").filters({"$and":[{"region":"CA"},{"locality":"berkeley"}]}).include_count(True).limit(str(limit)).offset(str(curOffset)).sort("address:asc")
 		results = results+query.data()
 		curOffset=curOffset+limit
 	
@@ -27,7 +27,7 @@ if __name__ == "__main__":
 				lim = (nextMax-curOffset) % limit
 			else:
 				lim = limit
-			query = factual.table("restaurants-us").filters({"$and":[{"region":"CA"},{"locality":"berkeley"}]}).include_count(True).limit(str(lim)).offset(str(curOffset)).sort("address:desc")
+			query = factual.table("restaurants").filters({"$and":[{"region":"CA"},{"locality":"berkeley"}]}).include_count(True).limit(str(lim)).offset(str(curOffset)).sort("address:desc")
 			results = results + query.data()
 			curOffset=curOffset+lim
 	#print tot
